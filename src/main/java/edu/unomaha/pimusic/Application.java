@@ -12,9 +12,9 @@ public class Application {
 
 		final GpioController gpio = GpioFactory.getInstance();
 
-		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyButton",
+		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_14, "MyButton",
 				PinPullResistance.PULL_DOWN);
-		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_16, "MyButton",
+		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyOtherButton",
 				PinPullResistance.PULL_DOWN);
 
 		myButton.addListener(new TestButtonListener());
