@@ -15,11 +15,19 @@ public class Application {
 
 		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_14, "MyButton",
 				PinPullResistance.PULL_DOWN);
+		myButton.setShutdownOptions(true);
 		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyOtherButton",
 				PinPullResistance.PULL_DOWN);
+		myButton.setShutdownOptions(true);
 
 		myButton.addListener(new TestButtonListener());
 		myOtherButton.addTrigger(new GpioCallbackTrigger(new TestCallback()));
+		myOtherButton.addListener(new TestButtonListener());
+		myOtherButton.addTrigger(new GpioCallbackTrigger(new TestCallback()));
+
+		LedGrid g = new LedGrid();
+
+		easyTest(g, 2, 2);
 
 		while (true) {
 			Thread.sleep(500);
