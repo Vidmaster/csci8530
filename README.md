@@ -1,9 +1,10 @@
-# csci8530
-UNOmaha CSCI 8530 - Advanced Operating Systems
-Music Visualization on an 8x8 LED grid with Raspberry Pi
+# UNOmaha CSCI 8530
+## Advanced Operating Systems Term Project - Henry McNeil
+### Music Visualization on an 8x8 LED grid with Raspberry Pi
 
 The grid has 16 pins, which correspond to the 8 rows and 8 columns of the grid.
 The numbering for pins : row/col : Pi GPIO is as follows:
+
 | Pin | Row/Column | GPIO |
 |---|---|---|
 | 9 | R1 | 21 |
@@ -24,6 +25,7 @@ The numbering for pins : row/col : Pi GPIO is as follows:
 | 16 | C8 | 18 |
 
 Additionally, two buttons are wired to pins 14 and 15, and their intended functions are as follows:
+
 |Button|Pin|
 |---|---|
 |Play/Pause|14|
