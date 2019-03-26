@@ -13,12 +13,13 @@ public class Application {
 
 		final GpioController gpio = GpioFactory.getInstance();
 
-		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_14, "MyButton",
+		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyButton",
 				PinPullResistance.PULL_DOWN);
 		myButton.setShutdownOptions(true);
-		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyOtherButton",
+		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_16, "MyOtherButton",
 				PinPullResistance.PULL_DOWN);
 		myButton.setShutdownOptions(true);
+		myOtherButton.setShutdownOptions(true);
 
 		myButton.addListener(new TestButtonListener());
 		myOtherButton.addTrigger(new GpioCallbackTrigger(new TestCallback()));
