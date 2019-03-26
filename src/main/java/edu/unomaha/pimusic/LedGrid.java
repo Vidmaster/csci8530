@@ -24,24 +24,24 @@ public class LedGrid {
 	}
 
 	private void provisionGrid() {
-		this.r1 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_21, "R1", PinState.LOW);
-		this.r2 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_16, "R2", PinState.LOW);
-		this.r3 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06, "R3", PinState.LOW);
-		this.r4 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_20, "R4", PinState.LOW);
-		this.r5 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17, "R5", PinState.LOW);
-		this.r6 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_05, "R6", PinState.LOW);
-		this.r7 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_27, "R7", PinState.LOW);
-		this.r8 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_22, "R8", PinState.LOW);
+		this.r1 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_29, "R1", PinState.LOW);
+		this.r2 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_27, "R2", PinState.LOW);
+		this.r3 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_22, "R3", PinState.LOW);
+		this.r4 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_28, "R4", PinState.LOW);
+		this.r5 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "R5", PinState.LOW);
+		this.r6 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_21, "R6", PinState.LOW);
+		this.r7 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02, "R7", PinState.LOW);
+		this.r8 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, "R8", PinState.LOW);
 		this.rows = buildBottomUpRowArray();
 
-		this.c1 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_24, "C1", PinState.HIGH);
-		this.c2 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_19, "C2", PinState.HIGH);
-		this.c3 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_13, "C3", PinState.HIGH);
-		this.c4 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_12, "C4", PinState.HIGH);
-		this.c5 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_26, "C5", PinState.HIGH);
-		this.c6 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25, "C6", PinState.HIGH);
-		this.c7 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_23, "C7", PinState.HIGH);
-		this.c8 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18, "C8", PinState.HIGH);
+		this.c1 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_05, "C1", PinState.HIGH);
+		this.c2 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_24, "C2", PinState.HIGH);
+		this.c3 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_23, "C3", PinState.HIGH);
+		this.c4 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_26, "C4", PinState.HIGH);
+		this.c5 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25, "C5", PinState.HIGH);
+		this.c6 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06, "C6", PinState.HIGH);
+		this.c7 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04, "C7", PinState.HIGH);
+		this.c8 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "C8", PinState.HIGH);
 		this.columns = buildColumnArray();
 	}
 
