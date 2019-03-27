@@ -5,7 +5,6 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.trigger.GpioCallbackTrigger;
 
 public class Application {
 
@@ -14,21 +13,20 @@ public class Application {
 		final GpioController gpio = GpioFactory.getInstance();
 
 		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyButton",
-				PinPullResistance.PULL_DOWN);
+				PinPullResistance.PULL_UP);
 		myButton.setShutdownOptions(true);
 		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_16, "MyOtherButton",
-				PinPullResistance.PULL_DOWN);
+				PinPullResistance.PULL_UP);
 		myButton.setShutdownOptions(true);
 		myOtherButton.setShutdownOptions(true);
 
 		myButton.addListener(new TestButtonListener());
-		myOtherButton.addTrigger(new GpioCallbackTrigger(new TestCallback()));
 		myOtherButton.addListener(new TestButtonListener());
-		myOtherButton.addTrigger(new GpioCallbackTrigger(new TestCallback()));
 
 		LedGrid g = new LedGrid();
 
-		easyTest(g, 2, 2);
+		easyTest(g, 1, 1);
+		triangleTest(g);
 
 		while (true) {
 			Thread.sleep(500);
