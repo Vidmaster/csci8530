@@ -5,8 +5,12 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 public class Application {
+
+	static LedGrid g;
 
 	public static void main(String[] args) throws InterruptedException {
 
@@ -20,10 +24,22 @@ public class Application {
 		myButton.setShutdownOptions(true);
 		myOtherButton.setShutdownOptions(true);
 
-		myButton.addListener(new TestButtonListener());
-		myOtherButton.addListener(new TestButtonListener());
+		g = LedGrid.getInstance();
 
-		LedGrid g = new LedGrid();
+		myButton.addListener(new TestButtonListener());
+		myOtherButton.addListener(new GpioPinListenerDigital() {
+
+			public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+				// TODO Auto-generated method stub
+				try {
+					triangleTest(g);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		});
 
 		easyTest(g, 1, 1);
 		triangleTest(g);
@@ -44,6 +60,8 @@ public class Application {
 			int[] test1 = { 8, 7, 6, 5, 4, 3, 2, 1 };
 			grid.activateGrid(test1);
 		}
+
+		Thread.sleep(1000);
 
 		// /| triangle
 		for (int i = 0; i < 30; i++) {

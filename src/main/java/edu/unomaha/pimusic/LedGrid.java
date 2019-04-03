@@ -7,6 +7,7 @@ import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
 public class LedGrid {
+	private static volatile LedGrid instance;
 
 	GpioController gpio;
 
@@ -18,11 +19,21 @@ public class LedGrid {
 	// 1000 ms / 30 Hz / 8 columns = 4.16 ms/column
 	static final int DEFAULT_PULSE_DURATION = 4;
 
-	public LedGrid() {
+	public static synchronized LedGrid getInstance() {
+		if (instance == null) {
+			instance = new LedGrid();
+		}
+
+		return instance;
+	}
+
+	private LedGrid() {
 		this.gpio = GpioFactory.getInstance();
 		provisionGridWPI();
 	}
 
+	// This method creates the LED grid using the BCM pin numbers.
+	@SuppressWarnings("unused")
 	private void provisionGridBCM() {
 		this.r1 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_21, "R1", PinState.LOW);
 		this.r2 = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_16, "R2", PinState.LOW);
@@ -84,6 +95,7 @@ public class LedGrid {
 			System.out.println("Received " + levels.toString() + " in activateGrid");
 			throw new RuntimeException("Bad levels received in activateGrid");
 		}
+
 		for (int c = 0; c < 8; c++) {
 			activateColumn(c, levels[c]);
 			Thread.sleep(DEFAULT_PULSE_DURATION);
@@ -105,9 +117,17 @@ public class LedGrid {
 		}
 
 		for (int i = 0; i < level; i++) {
-			rows[i].pulse(duration);
+			try {
+				rows[i].pulse(duration);
+			} catch (Exception ex) {
+				System.out.println("error activating pin " + i);
+			}
 		}
-		columns[c].pulse(duration, PinState.LOW);
+		try {
+			columns[c].pulse(duration, PinState.LOW);
+		} catch (Exception ex) {
+			System.out.println("error activating column " + c);
+		}
 	}
 
 }

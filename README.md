@@ -31,6 +31,29 @@ Note that the GPIO pin numbers on the RPI documentation and the pin numbers used
 Additionally, two buttons are wired to pins 14 and 15, and their intended functions are as follows:
 
 |Button|Pin|wPi|
-|---|---|
+|---|---|---|
 |Play/Pause|14|15|
 |Next|15|16|
+
+## Lessons learned along the way
+1. Resistors are important. Messed up a whole row of the LED grid this way.
+2. Be careful of the wiring. My buttons weren't working because I had them going to ground with the pull down resistor, so obviously nothing was happening.
+3. Pin numbering is different between WiringPi and the Pi's pinout diagram.
+4. When pulsing a lot of pins at once things get weird. This seems to be related to some of the pi4j internals, which are doing a lot of asynchronous stuff behind the scenes. The current solution is to make judicious use of try/catch blocks.
+5. Obvious in hindsight, but we can't just read the bytes of a file and turn them into frequencies. For a 24-bit audio file, we need to read 3 bytes per channel, or 6 bytes per frame. Now the concept of frames and why they're 6 bytes makes a lot more sense!
+6. TarsosDSP is awesome for signal processing and not great for actually playing audio with how I'm using it
+
+## General progress updates
+March 23-31: Busy due to work and other coursework early in the month. Completed LED grid tests and hardware setup. Wrote some code to do more interesting hardware tests. Initial research on spectrum analysis, FFTs, signal processing, and other related concepts.
+April 1-2: Implemented test code to play an audio file and spit out a small spectrum. Neat! Also began work on report and presentation.
+
+## Helpful and/or Cool Resources
+* https://0110.be/releases/TarsosDSP/TarsosDSP-latest/TarsosDSP-latest-Documentation/
+* https://github.com/JorenSix/TarsosDSP
+* http://wiringpi.com/pins/
+* https://www.instructables.com/id/RGB-LED-STRIP-COLOR-ORGAN-WITHOUT-MICROCONTROLLER/
+* https://pi4j.com
+* http://commons.apache.org/proper/commons-math/javadocs/api-3.4/org/apache/commons/math3/transform/FastFourierTransformer.html
+* https://stackoverflow.com/questions/6740545/understanding-fft-output
+* https://en.wikipedia.org/wiki/Window_function
+* https://www.developer.com/java/other/article.php/2191351/Java-Sound-Using-Audio-Line-Events.htm
