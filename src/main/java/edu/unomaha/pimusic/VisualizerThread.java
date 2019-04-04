@@ -2,11 +2,11 @@ package edu.unomaha.pimusic;
 
 public class VisualizerThread implements Runnable {
 	private static final int msPerUpdate = 1000 / 30;
-	AudioController ac;
+	VisualizationController visualizationController;
 	LedGrid grid;
 
 	public VisualizerThread() {
-		ac = AudioController.getInstance();
+		visualizationController = VisualizationController.getInstance();
 		grid = LedGrid.getInstance();
 	}
 
@@ -14,7 +14,7 @@ public class VisualizerThread implements Runnable {
 		int[] levels;
 		while (true) {
 			try {
-				levels = ac.getGridLevels();
+				levels = visualizationController.getGridLevels();
 				grid.activateGrid(levels);
 				Thread.sleep(msPerUpdate);
 			} catch (InterruptedException e) {

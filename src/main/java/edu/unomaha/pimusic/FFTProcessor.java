@@ -6,10 +6,10 @@ import be.tarsos.dsp.util.fft.BlackmanWindow;
 import be.tarsos.dsp.util.fft.FFT;
 
 public class FFTProcessor implements AudioProcessor {
-	AudioController ac;
+	VisualizationController ac;
 
 	public FFTProcessor() {
-		ac = AudioController.getInstance();
+		ac = VisualizationController.getInstance();
 	}
 
 	public boolean process(AudioEvent audioEvent) {

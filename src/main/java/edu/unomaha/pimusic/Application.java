@@ -5,75 +5,41 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 public class Application {
 
-	static LedGrid g;
+	final LedGrid grid = LedGrid.getInstance();
+	final GpioController gpio = GpioFactory.getInstance();
+
+	Player player;
 
 	public static void main(String[] args) throws InterruptedException {
-
-		final GpioController gpio = GpioFactory.getInstance();
-
-		GpioPinDigitalInput myButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "MyButton",
-				PinPullResistance.PULL_UP);
-		myButton.setShutdownOptions(true);
-		GpioPinDigitalInput myOtherButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_16, "MyOtherButton",
-				PinPullResistance.PULL_UP);
-		myButton.setShutdownOptions(true);
-		myOtherButton.setShutdownOptions(true);
-
-		g = LedGrid.getInstance();
-
-		myButton.addListener(new TestButtonListener());
-		myOtherButton.addListener(new GpioPinListenerDigital() {
-
-			public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-				// TODO Auto-generated method stub
-				try {
-					triangleTest(g);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-		});
-
-		easyTest(g, 1, 1);
-		triangleTest(g);
-
-		while (true) {
-			Thread.sleep(500);
-		}
-
+		Application a = new Application();
+		a.init();
+		a.run();
 	}
 
-	private static void easyTest(LedGrid grid, int row, int col) {
-		grid.activateColumn(col, row, 200);
+	public void init() {
+		player = new Player();
+		configureButtons();
 	}
 
-	private static void triangleTest(LedGrid grid) throws InterruptedException {
-		// |\ triangle
-		for (int i = 0; i < 30; i++) {
-			int[] test1 = { 8, 7, 6, 5, 4, 3, 2, 1 };
-			grid.activateGrid(test1);
-		}
+	public void run() {
+		Thread visualizer = new Thread(new VisualizerThread());
+		visualizer.start();
+		player.play();
+	}
 
-		Thread.sleep(1000);
+	private void configureButtons() {
+		GpioPinDigitalInput playPauseButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_15, "PlayPause",
+				PinPullResistance.PULL_UP);
+		playPauseButton.setShutdownOptions(true);
+		playPauseButton.addListener(new PlayPauseButtonListener(player));
 
-		// /| triangle
-		for (int i = 0; i < 30; i++) {
-			int[] test1 = { 1, 2, 3, 4, 5, 6, 7, 8 };
-			grid.activateGrid(test1);
-		}
-
-		// /\ triangle
-		for (int i = 0; i < 30; i++) {
-			int[] test1 = { 2, 4, 6, 8, 8, 6, 4, 2 };
-			grid.activateGrid(test1);
-		}
+		GpioPinDigitalInput nextButton = gpio.provisionDigitalInputPin(RaspiPin.GPIO_16, "MyOtherButton",
+				PinPullResistance.PULL_UP);
+		nextButton.setShutdownOptions(true);
+		nextButton.addListener(new NextTrackListener(player));
 	}
 
 }

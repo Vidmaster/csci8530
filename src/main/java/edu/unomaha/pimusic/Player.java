@@ -1,5 +1,5 @@
 /*
- * Modified from TarsosDSP example code by Henry McNeil for CSCI 8530
+ * Modified from TarsosDSP example Player code by Henry McNeil for CSCI 8530
  * at the University of Nebraska, Omaha
  * 
  * TODO: Tarsos audio output is choppy right now. Test on the Pi and then
@@ -35,6 +35,12 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -72,12 +78,32 @@ public class Player implements AudioProcessor {
 	private double gain;
 	private double tempo;
 
+	private List<String> files;
+	private int currentFileIndex = 0;
+
 	public Player(AudioProcessor beforeWSOLAProcessor, AudioProcessor afterWSOLAProcessor) {
 		state = PlayerState.NO_FILE_LOADED;
 		gain = 1.0;
 		tempo = 1.0;
 		this.beforeWSOLAProcessor = beforeWSOLAProcessor;
 		this.afterWSOLAProcessor = afterWSOLAProcessor;
+	}
+
+	/*
+	 * HCM Added - Initialize a new player with the FFT processor and load the
+	 * first file from the resources directory
+	 */
+	public Player() {
+		this(null, new FFTProcessor());
+		load(getFileList().get(0));
+	}
+
+	/*
+	 * HCM Added - Overloaded for convenience
+	 */
+	public void load(String filePath) {
+		File file = new File(filePath);
+		load(file);
 	}
 
 	public void load(File file) {
@@ -106,6 +132,9 @@ public class Player implements AudioProcessor {
 		setState(PlayerState.NO_FILE_LOADED);
 	}
 
+	/*
+	 * HCM Added - Added for convenience
+	 */
 	public void playPause() {
 		if (state == PlayerState.PLAYING) {
 			pauze();
@@ -266,5 +295,56 @@ public class Player implements AudioProcessor {
 				 * Audio play back is stopped.
 				 */
 		STOPPED
+	}
+
+	/*
+	 * HCM Added - Load and play the next file from the player's list
+	 */
+	public void next() {
+		currentFileIndex++;
+		if (currentFileIndex > files.size()) {
+			currentFileIndex = 0;
+		}
+		eject();
+		load(new File(files.get(currentFileIndex)));
+		play();
+	}
+
+	/*
+	 * HCM Added - Build a list of files from the resources/music directory
+	 */
+	public void setFileList() {
+		String resourcesDirectory = this.getClass().getResource("/music").getPath();
+		Path p = Paths.get(resourcesDirectory);
+		System.out.println("Audio files found:");
+		try (Stream<Path> walk = Files.list(p)) {
+
+			files = walk.map(x -> x.toString()).filter(f -> f.endsWith(".wav")).collect(Collectors.toList());
+
+			files.forEach(System.out::println);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public List<String> getFileList() {
+		return files;
+	}
+
+	public String getCurrentFile() {
+		return this.files.get(currentFileIndex);
+	}
+
+	public int getCurrent() {
+		return this.currentFileIndex;
+	}
+
+	public String nowPlaying() {
+		if (state == PlayerState.PLAYING) {
+			String[] f = getCurrentFile().split("/");
+			return f[f.length - 1];
+		}
+		return state.name();
 	}
 }
