@@ -113,10 +113,10 @@ public class TestAudio {
 
 	@Test
 	public void playerTest() throws Exception {
-		String filePath = Application.class.getResource("/Trance2_Lead.wav").getFile();
+		String filePath = Application.class.getResource("/music/Trance2_Lead.wav").getFile();
 
 		Player player = new Player(new FFTProcessor(), null);
-		player.load(new File(filePath));
+		player.load(filePath);
 		player.play();
 
 		while (player.getState() == PlayerState.PLAYING) {
