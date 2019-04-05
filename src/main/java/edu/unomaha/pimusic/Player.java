@@ -38,7 +38,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -316,31 +319,33 @@ public class Player implements AudioProcessor {
 	 */
 	public void setFileList() {
 		// https://stackoverflow.com/questions/11012819/how-can-i-get-a-resource-folder-from-inside-my-jar-file
+		System.out.println("Audio files found:");
 		String resourcesDirectory = this.getClass().getResource("/music").getPath();
 		File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
 
-		if(jarFile.isFile()) {  // Run with JAR file
-			    final JarFile jar = new JarFile(jarFile);
-			        final Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
-				    while(entries.hasMoreElements()) {
-					            final String name = entries.nextElement().getName();
-						            if (name.startsWith(path + "/music")) { //filter according to the path
-								                System.out.println(name);
-										        }
-							        }
-				        jar.close();
+		if (jarFile.isFile()) { // Run with JAR file
+			try (JarFile jar = new JarFile(jarFile)) {
+				final Enumeration<JarEntry> entries = jar.entries();
+				while (entries.hasMoreElements()) {
+					final String name = entries.nextElement().getName();
+					if (name.endsWith(".wav")) { // filter according to the path
+						System.out.println(name);
+						files.add(name);
+					}
+				}
+				jar.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		} else {
-		Path p = Paths.get(resourcesDirectory);
-		System.out.println("Audio files found:");
-		try (Stream<Path> walk = Files.list(p)) {
+			Path p = Paths.get(resourcesDirectory);
 
-			files = walk.map(x -> x.toString()).filter(f -> f.endsWith(".wav")).collect(Collectors.toList());
-
-			files.forEach(System.out::println);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			try (Stream<Path> walk = Files.list(p)) {
+				files = walk.map(x -> x.toString()).filter(f -> f.endsWith(".wav")).collect(Collectors.toList());
+				files.forEach(System.out::println);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
