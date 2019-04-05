@@ -87,6 +87,7 @@ public class Player implements AudioProcessor {
 		tempo = 1.0;
 		this.beforeWSOLAProcessor = beforeWSOLAProcessor;
 		this.afterWSOLAProcessor = afterWSOLAProcessor;
+		setFileList();
 	}
 
 	/*
@@ -314,7 +315,21 @@ public class Player implements AudioProcessor {
 	 * HCM Added - Build a list of files from the resources/music directory
 	 */
 	public void setFileList() {
+		// https://stackoverflow.com/questions/11012819/how-can-i-get-a-resource-folder-from-inside-my-jar-file
 		String resourcesDirectory = this.getClass().getResource("/music").getPath();
+		File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+
+		if(jarFile.isFile()) {  // Run with JAR file
+			    final JarFile jar = new JarFile(jarFile);
+			        final Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+				    while(entries.hasMoreElements()) {
+					            final String name = entries.nextElement().getName();
+						            if (name.startsWith(path + "/music")) { //filter according to the path
+								                System.out.println(name);
+										        }
+							        }
+				        jar.close();
+		} else {
 		Path p = Paths.get(resourcesDirectory);
 		System.out.println("Audio files found:");
 		try (Stream<Path> walk = Files.list(p)) {
@@ -325,6 +340,7 @@ public class Player implements AudioProcessor {
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
 		}
 	}
 
