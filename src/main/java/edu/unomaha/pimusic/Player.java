@@ -237,6 +237,7 @@ public class Player implements AudioProcessor {
 			setState(PlayerState.PAUZED);
 			dispatcher.stop();
 			clip.stop();
+			clip.close();
 			pauzedAt = pauzeAt;
 		} else {
 			throw new IllegalStateException("Can not pauze when nothing is playing");
@@ -248,6 +249,7 @@ public class Player implements AudioProcessor {
 			setState(PlayerState.STOPPED);
 			dispatcher.stop();
 			clip.stop();
+			clip.close();
 		} else if (state != PlayerState.STOPPED) {
 			throw new IllegalStateException("Can not stop when nothing is playing");
 		}
