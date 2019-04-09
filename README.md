@@ -2,8 +2,9 @@
 ## Advanced Operating Systems Term Project - Henry McNeil
 ### Music Visualization on an 8x8 LED grid with Raspberry Pi
 
-The grid has 16 pins, which correspond to the 8 rows and 8 columns of the grid.
+NOTE: Audio output may not work without following this guide: https://nealvs.wordpress.com/2017/08/11/java-sound-on-a-raspberry-pi-with-openjdk/
 
+The grid has 16 pins, which correspond to the 8 rows and 8 columns of the grid.
 
 The numbering for pins : row/col : BCM : wiringPi is as follows:
 
@@ -45,7 +46,11 @@ Additionally, two buttons are wired to pins 14 and 15, and their intended functi
 
 ## General progress updates
 March 23-31: Busy due to work and other coursework early in the month. Completed LED grid tests and hardware setup. Wrote some code to do more interesting hardware tests. Initial research on spectrum analysis, FFTs, signal processing, and other related concepts.
+
 April 1-2: Implemented test code to play an audio file and spit out a small spectrum. Neat! Also began work on report and presentation.
+
+April 8: Bugfixes and misguided fixes that just made things worse oh no. This was a lifesaver: https://nealvs.wordpress.com/2017/08/11/java-sound-on-a-raspberry-pi-with-openjdk/. 
+
 
 ## Helpful and/or Cool Resources
 * https://0110.be/releases/TarsosDSP/TarsosDSP-latest/TarsosDSP-latest-Documentation/
@@ -60,4 +65,5 @@ April 1-2: Implemented test code to play an audio file and spit out a small spec
 * https://stackoverflow.com/questions/19414453/how-to-get-resources-directory-path-programmatically
 * https://stackoverflow.com/questions/11012819/how-can-i-get-a-resource-folder-from-inside-my-jar-file
 * http://www.kingbrightusa.com/images/catalog/spec/tc15-11srwa.pdf
+* https://nealvs.wordpress.com/2017/08/11/java-sound-on-a-raspberry-pi-with-openjdk/
 
