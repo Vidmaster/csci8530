@@ -14,6 +14,8 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import be.tarsos.dsp.util.fft.FFT;
@@ -21,8 +23,31 @@ import be.tarsos.dsp.util.fft.HannWindow;
 import edu.unomaha.pimusic.Player.PlayerState;
 
 public class TestAudio {
+
+	private static final String TEST_FILE = "/Users/Vidmaster/csci8530/src/main/resources/music/Trance2_Lead.wav";
+
+	private Player p;
+
+	@Before
+	public void setup() {
+		p = new Player("src/main/resources/music");
+	}
+
+	@After
+	public void reset() {
+		try {
+			p.eject();
+			Clip c = AudioSystem.getClip();
+			c.stop();
+			c.setFramePosition(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// Left intentionally blank
+		}
+	}
+
 	@Test
-	public void stuff() {
+	public void testMixerInfo() {
 		Info[] info = AudioSystem.getMixerInfo();
 		for (Info i : info) {
 			System.out.println(i.toString());
@@ -31,7 +56,7 @@ public class TestAudio {
 
 	@Test
 	public void testJVMAudioStream() throws Exception {
-		File f = new File("/Users/Vidmaster/csci8530/src/test/resources/Trance2_Lead.wav");
+		File f = new File(TEST_FILE);
 		AudioInputStream in = AudioSystem.getAudioInputStream(f);
 		Clip c = AudioSystem.getClip();
 		c.open(in);
@@ -41,14 +66,15 @@ public class TestAudio {
 		System.out.println(c.getFormat().getSampleRate());
 		System.out.println(c.getFrameLength());
 
-		Thread.sleep(3000);
+		Thread.sleep(1000);
 		c.stop();
 		c.close();
+		c.setFramePosition(0);
 	}
 
 	@Test
 	public void testFFT() throws Exception {
-		File f = new File("/Users/Vidmaster/csci8530/src/test/resources/Trance2_Lead.wav");
+		File f = new File(TEST_FILE);
 		AudioInputStream in = AudioSystem.getAudioInputStream(f);
 		byte[] b = new byte[1024];
 		System.out.println("Read " + in.read(b, 0, 1024));
@@ -84,7 +110,7 @@ public class TestAudio {
 	public void testTarsosFFT() throws IOException, UnsupportedAudioFileException {
 		int size = 4096;
 
-		File f = new File("/Users/Vidmaster/csci8530/src/test/resources/Trance2_Lead.wav");
+		File f = new File(TEST_FILE);
 		AudioInputStream in = AudioSystem.getAudioInputStream(f);
 		byte[] b = new byte[size];
 		System.out.println("Read " + in.read(b, 0, size));
@@ -113,13 +139,10 @@ public class TestAudio {
 
 	@Test
 	public void playerTest() throws Exception {
-		String filePath = Application.class.getResource("/music/Trance2_Lead.wav").getFile();
+		p.load(TEST_FILE);
+		p.play();
 
-		Player player = new Player(new FFTProcessor(), null);
-		player.load(filePath);
-		player.play();
-
-		while (player.getState() == PlayerState.PLAYING) {
+		while (p.getState() == PlayerState.PLAYING) {
 			Thread.sleep(50);
 		}
 	}

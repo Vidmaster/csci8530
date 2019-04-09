@@ -38,16 +38,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -60,6 +59,11 @@ import be.tarsos.dsp.WaveformSimilarityBasedOverlapAdd.Parameters;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.io.jvm.AudioPlayer;
 
+// TODO: Fix audio playing.
+/*
+ * Need to add a java Clip and play it in parallel with the player
+ * Should be able to synchronize between time played and frames
+ */
 public class Player implements AudioProcessor {
 
 	private PropertyChangeSupport support = new PropertyChangeSupport(this);
@@ -83,22 +87,32 @@ public class Player implements AudioProcessor {
 
 	private List<String> files;
 	private int currentFileIndex = 0;
+	private String musicDirectory;
+
+	private Clip clip;
 
 	public Player(AudioProcessor beforeWSOLAProcessor, AudioProcessor afterWSOLAProcessor) {
 		state = PlayerState.NO_FILE_LOADED;
-		gain = 1.0;
+		gain = 0.0; // Set gain to 0 so only the JVM Clip outputs sound
 		tempo = 1.0;
 		this.beforeWSOLAProcessor = beforeWSOLAProcessor;
 		this.afterWSOLAProcessor = afterWSOLAProcessor;
-		setFileList();
+		this.musicDirectory = "music";
+		try {
+			this.clip = AudioSystem.getClip();
+		} catch (LineUnavailableException e) {
+			System.out.println("Unable to get system audio output");
+		}
 	}
 
 	/*
 	 * HCM Added - Initialize a new player with the FFT processor and load the
 	 * first file from the resources directory
 	 */
-	public Player() {
+	public Player(String musicDirectory) {
 		this(null, new FFTProcessor());
+		this.musicDirectory = musicDirectory;
+		setFileList();
 		load(getFileList().get(0));
 	}
 
@@ -132,7 +146,11 @@ public class Player implements AudioProcessor {
 
 	public void eject() {
 		loadedFile = null;
-		stop();
+		try {
+			stop();
+		} catch (Exception ex) {
+			// Left intentionally blank
+		}
 		setState(PlayerState.NO_FILE_LOADED);
 	}
 
@@ -142,7 +160,10 @@ public class Player implements AudioProcessor {
 	public void playPause() {
 		if (state == PlayerState.PLAYING) {
 			pauze();
-		} else if (state == PlayerState.PAUZED) {
+		} else {
+			if (state != PlayerState.NO_FILE_LOADED) {
+				load(new File(files.get(0)));
+			}
 			play();
 		}
 	}
@@ -163,7 +184,10 @@ public class Player implements AudioProcessor {
 		} else {
 			try {
 				AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(loadedFile);
+				AudioInputStream in = AudioSystem.getAudioInputStream(loadedFile);
+				clip.open(in);
 				AudioFormat format = fileFormat.getFormat();
+				clip.setMicrosecondPosition((long) (startTime * 1000000.0));
 
 				gainProcessor = new GainProcessor(gain);
 				audioPlayer = new AudioPlayer(format);
@@ -191,6 +215,7 @@ public class Player implements AudioProcessor {
 				dispatcher.addAudioProcessor(audioPlayer);
 
 				Thread t = new Thread(dispatcher, "Audio Player Thread");
+				clip.start();
 				t.start();
 				setState(PlayerState.PLAYING);
 			} catch (UnsupportedAudioFileException e) {
@@ -211,6 +236,7 @@ public class Player implements AudioProcessor {
 		if (state == PlayerState.PLAYING || state == PlayerState.PAUZED) {
 			setState(PlayerState.PAUZED);
 			dispatcher.stop();
+			clip.stop();
 			pauzedAt = pauzeAt;
 		} else {
 			throw new IllegalStateException("Can not pauze when nothing is playing");
@@ -221,6 +247,7 @@ public class Player implements AudioProcessor {
 		if (state == PlayerState.PLAYING || state == PlayerState.PAUZED) {
 			setState(PlayerState.STOPPED);
 			dispatcher.stop();
+			clip.stop();
 		} else if (state != PlayerState.STOPPED) {
 			throw new IllegalStateException("Can not stop when nothing is playing");
 		}
@@ -306,10 +333,14 @@ public class Player implements AudioProcessor {
 	 */
 	public void next() {
 		currentFileIndex++;
-		if (currentFileIndex > files.size()) {
+		if (currentFileIndex >= files.size()) {
 			currentFileIndex = 0;
 		}
-		eject();
+		try {
+			eject();
+		} catch (IllegalStateException e) {
+			System.out.println("Error ejecting: " + e.getMessage());
+		}
 		load(new File(files.get(currentFileIndex)));
 		play();
 	}
@@ -318,34 +349,14 @@ public class Player implements AudioProcessor {
 	 * HCM Added - Build a list of files from the resources/music directory
 	 */
 	public void setFileList() {
-		// https://stackoverflow.com/questions/11012819/how-can-i-get-a-resource-folder-from-inside-my-jar-file
-		System.out.println("Audio files found:");
-		String resourcesDirectory = this.getClass().getResource("/music").getPath();
-		File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+		Path p = Paths.get(musicDirectory);
+		System.out.println("Audio files found in " + p.toAbsolutePath() + ":");
 
-		if (jarFile.isFile()) { // Run with JAR file
-			try (JarFile jar = new JarFile(jarFile)) {
-				final Enumeration<JarEntry> entries = jar.entries();
-				while (entries.hasMoreElements()) {
-					final String name = entries.nextElement().getName();
-					if (name.endsWith(".wav")) { // filter according to the path
-						System.out.println(name);
-						files.add(name);
-					}
-				}
-				jar.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			Path p = Paths.get(resourcesDirectory);
-
-			try (Stream<Path> walk = Files.list(p)) {
-				files = walk.map(x -> x.toString()).filter(f -> f.endsWith(".wav")).collect(Collectors.toList());
-				files.forEach(System.out::println);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		try (Stream<Path> walk = Files.list(p)) {
+			files = walk.map(x -> x.toString()).filter(f -> f.endsWith(".wav")).collect(Collectors.toList());
+			files.forEach(System.out::println);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
